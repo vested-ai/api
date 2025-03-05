@@ -21,13 +21,13 @@ This template demonstrates how to deploy a simple NodeJS function running on AWS
 
 In order to deploy the example, you need to run the following command:
 
-```
+```bash
 serverless deploy
 ```
 
 After running deploy, you should see output similar to:
 
-```
+```bash
 Deploying "aws-node" to stage "dev" (us-east-1)
 
 ✔ Service deployed to stack aws-node-dev (90s)
@@ -40,7 +40,7 @@ functions:
 
 After successful deployment, you can invoke the deployed function by using the following command:
 
-```
+```bash
 serverless invoke --function hello
 ```
 
@@ -57,7 +57,7 @@ Which should result in response similar to the following:
 
 The easiest way to develop and test your function is to use the Serverless Framework's `dev` command:
 
-```
+```bash 
 serverless dev
 ```
 
@@ -66,3 +66,19 @@ This will start a local emulator of AWS Lambda and tunnel your requests to and f
 Now you can invoke the function as before, but this time the function will be executed locally. Now you can develop your function locally, invoke it, and see the results immediately without having to re-deploy.
 
 When you are done developing, don't forget to run `serverless deploy` to deploy the function to the cloud.
+
+## Monitoring and Troubleshooting
+
+### Logs
+
+To view the logs of the deployed function, you can use the following command:
+
+```bash
+serverless logs -f hello
+```
+
+You can also use the `--tail` flag to view the logs in real time:
+
+```bash
+serverless logs -f hello --tail
+```
