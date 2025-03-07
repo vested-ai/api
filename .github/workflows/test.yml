@@ -23,6 +23,10 @@ jobs:
       working-directory: ./api
       run: yarn install --frozen-lockfile
 
+    - name: Run type check
+      working-directory: ./api
+      run: yarn type-check
+
     - name: Run tests
       working-directory: ./api
       run: yarn test 
