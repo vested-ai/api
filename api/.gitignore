@@ -1,27 +1,2 @@
-# Environment variables
-.env
-.env.*
-
-# Logs
-logs
-*.log
-npm-debug.log*
-
-# OS-specific files
-.DS_Store
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# IDE
-.idea
-.vscode
-
-# Node
 node_modules
-
-# Test coverage
-coverage
-
-# Serverless Framework
 .serverless
