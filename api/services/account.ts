@@ -1,6 +1,28 @@
-export async function createAccount(email: string, password: string) {
-  return {
-    verificationCode: 'not implemented',
+interface AccountResponse {
+  verificationCode?: string;
+  id?: string;
+  error?: string;
+}
+
+export async function createAccount(email: string, password: string): Promise<AccountResponse | { error: string }> {
+  try {
+    // Validate email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return { error: 'Invalid email format' };
+    }
+
+    // Validate password
+    if (!password || password.length < 4) {
+      return { error: 'Password must be at least 4 characters long' };
+    }
+
+    return {
+      verificationCode: 'not implemented',
+      id: 'not implemented',
+    }
+  } catch (error) {
+    console.error('Failed to create account:', error);
+    return { error: 'Failed to create account' };
   }
 }
 
