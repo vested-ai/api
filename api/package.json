@@ -1,7 +1,7 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Vested serverless API",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "express": "^4.19.2",
