@@ -1,3 +1,5 @@
+import { VERIFICATION_REQUIRED_FIELDS_ERROR, VERIFICATION_FAILED_ERROR } from '../utils/constants';
+
 interface VerificationResponse {
   success?: boolean;
   error?: string;
@@ -7,7 +9,7 @@ export async function verifyEmail(token: string, code: string): Promise<Verifica
   try {
     // Validate inputs
     if (!token || !code) {
-      return { error: 'Token and verification code are required' };
+      return { error: VERIFICATION_REQUIRED_FIELDS_ERROR };
     }
 
     // TODO: Implement these database operations:
@@ -20,6 +22,6 @@ export async function verifyEmail(token: string, code: string): Promise<Verifica
     return { success: true };
   } catch (error) {
     console.error('Failed to verify email:', error);
-    return { error: 'Failed to verify email' };
+    return { error: VERIFICATION_FAILED_ERROR };
   }
 } 
