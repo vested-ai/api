@@ -100,7 +100,7 @@ describe('API Handler', () => {
       });
     });
 
-    fit('should handle verification email errors', async () => {
+    it('should handle verification email errors', async () => {
       (createAccount as jest.Mock).mockResolvedValue({ verificationCode: 'code123', id: 'user123' });
       (sendVerificationEmail as jest.Mock).mockResolvedValue({ error: 'Email service unavailable' });
       
@@ -112,7 +112,7 @@ describe('API Handler', () => {
       expect(response.statusCode).toBe(500);
     });
 
-    xit('should handle unexpected errors', async () => {
+    it('should handle unexpected errors', async () => {
       (createAccount as jest.Mock).mockRejectedValue(new Error('Unexpected error'));
       
     const response = await handler(mockEvent, context) as ApiResponse;
