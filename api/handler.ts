@@ -3,6 +3,7 @@ import serverless from 'serverless-http';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { createAccount, sendVerificationEmail } from './services/account';
+import { verifyEmail } from './services/verification';
 import { EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE } from './utils/constants';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -22,6 +23,11 @@ interface APIGatewayRequest<P = any, ResBody = any, ReqBody = any> extends Reque
 interface RegisterRequestBody {
   email: string;
   password: string;
+}
+
+interface VerifyEmailBody {
+  code: string;
+  token: string;
 }
 
 app.get('/', (_req: Request, res: Response) => {
@@ -74,6 +80,32 @@ app.post('/register', async (req: APIGatewayRequest<{}, {}, RegisterRequestBody>
 
     return res.status(201).json({
       message: 'User registration successful',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Internal server error'
+    });
+  }
+});
+
+app.post('/verify-email', async (req: APIGatewayRequest<{}, {}, VerifyEmailBody>, res: Response) => {
+  try {
+    const { code, token } = req.apiGateway?.event?.body ? JSON.parse(req.apiGateway.event.body) : req.body;
+
+    if (!token || !code) {
+      return res.status(400).json({
+        error: 'Verification token and code are required'
+      });
+    }
+
+    const result = await verifyEmail(token, code);
+
+    if ('error' in result) {
+      return res.status(500).json({ error: result.error });
+    }
+
+    return res.status(200).json({
+      message: 'Email verification successful'
     });
   } catch (error) {
     return res.status(500).json({
