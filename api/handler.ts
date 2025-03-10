@@ -4,7 +4,11 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import { createAccount, sendVerificationEmail } from './services/account';
 import { verifyEmail } from './services/verification';
-import { EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE } from './utils/constants';
+import { 
+  EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE, 
+  VERIFICATION_REQUIRED_FIELDS_ERROR,
+  VERIFICATION_SUCCESS_MESSAGE 
+} from './utils/constants';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
 const app = express();
@@ -94,7 +98,7 @@ app.post('/verify-email', async (req: APIGatewayRequest<{}, {}, VerifyEmailBody>
 
     if (!token || !code) {
       return res.status(400).json({
-        error: 'Verification token and code are required'
+        error: VERIFICATION_REQUIRED_FIELDS_ERROR
       });
     }
 
@@ -105,7 +109,7 @@ app.post('/verify-email', async (req: APIGatewayRequest<{}, {}, VerifyEmailBody>
     }
 
     return res.status(200).json({
-      message: 'Email verification successful'
+      message: VERIFICATION_SUCCESS_MESSAGE
     });
   } catch (error) {
     return res.status(500).json({
