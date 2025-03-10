@@ -1,7 +1,7 @@
 import { handler } from '../handler';
 import { createAccount, sendVerificationEmail } from '../services/account';
 import bcrypt from 'bcryptjs';
-
+import { EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE } from '../utils/constants';
 // Define interface for API response
 interface ApiResponse {
 statusCode: number;
@@ -63,7 +63,7 @@ describe('API Handler', () => {
     const response = await handler(mockEvent, context) as ApiResponse;
       
       expect(bcrypt.hash).toHaveBeenCalledWith('password123', 12);
-      expect(createAccount).toHaveBeenCalledWith('test@example.com', 'password123');
+      expect(createAccount).toHaveBeenCalledWith('test@example.com', 'hashedPassword');
       expect(sendVerificationEmail).toHaveBeenCalledWith('test@example.com', 'code123');
       
       expect(response.statusCode).toBe(201);
@@ -87,13 +87,13 @@ describe('API Handler', () => {
     });
 
     it('should handle account creation errors', async () => {
-      (createAccount as jest.Mock).mockResolvedValue({ error: 'Invalid email format' });
+      (createAccount as jest.Mock).mockResolvedValue({ error: EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE });
       
     const response = await handler(mockEvent, context) as ApiResponse;
       
       expect(response.statusCode).toBe(400);
       expect(JSON.parse(response.body)).toEqual({
-        error: 'Invalid email format'
+        error: EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE
       });
     });
 

@@ -3,6 +3,7 @@ import serverless from 'serverless-http';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { createAccount, sendVerificationEmail } from './services/account';
+import { EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE } from './utils/constants';
 
 const app = express();
 
@@ -33,7 +34,7 @@ app.post('/register', async (req: Request<{}, {}, RegisterRequestBody>, res: Res
     // Basic validation
     if (!email || !password) {
       return res.status(400).json({
-        error: 'Email and password are required'
+        error: EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE
       });
     }
 
@@ -51,6 +52,7 @@ app.post('/register', async (req: Request<{}, {}, RegisterRequestBody>, res: Res
 
     // Send verification email
     const emailResult = await sendVerificationEmail(email, result.verificationCode!);
+    
     if (typeof emailResult === 'object' && 'error' in emailResult) {
       return res.status(500).json({ error: emailResult.error });
     }
