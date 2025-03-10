@@ -1,3 +1,5 @@
+import { isValidEmail } from '../utils/validation';
+
 interface AccountResponse {
   verificationCode?: string;
   id?: string;
@@ -7,7 +9,7 @@ interface AccountResponse {
 export async function createAccount(email: string, password: string): Promise<AccountResponse | { error: string }> {
   try {
     // Validate email
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isValidEmail(email)) {
       return { error: 'Invalid email format' };
     }
 
@@ -29,7 +31,7 @@ export async function createAccount(email: string, password: string): Promise<Ac
 export async function sendVerificationEmail(email: string, verificationCode: string): Promise<string | { error: string }> {
   try {
     // Validate inputs
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isValidEmail(email)) {
       return { error: 'Invalid email format' };
     }
     
