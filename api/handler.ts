@@ -62,6 +62,10 @@ app.post('/register', async (req: APIGatewayRequest<{}, {}, RegisterRequestBody>
     }
 
     // Send verification email
+    if (!result.verificationCode) {
+      return res.status(500).json({ error: 'Verification code not found' });
+    }
+
     const emailResult = await sendVerificationEmail(email, result.verificationCode!);
     
     if (typeof emailResult === 'object' && 'error' in emailResult) {
@@ -72,7 +76,6 @@ app.post('/register', async (req: APIGatewayRequest<{}, {}, RegisterRequestBody>
       message: 'User registration successful',
     });
   } catch (error) {
-    console.error('Registration error:', error);
     return res.status(500).json({
       error: 'Internal server error'
     });

@@ -122,6 +122,17 @@ describe('API Handler', () => {
         error: 'Internal server error'
       });
     });
+
+    it('should handle missing verification code from account creation', async () => {
+      (createAccount as jest.Mock).mockResolvedValue({ id: 'user123' }); // no verificationCode
+      
+      const response = await handler(mockEvent, context) as ApiResponse;
+      
+      expect(response.statusCode).toBe(500);
+      expect(JSON.parse(response.body)).toEqual({
+        error: 'Verification code not found'
+      });
+    });
   });
 
   describe('404 handler', () => {
