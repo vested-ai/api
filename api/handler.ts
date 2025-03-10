@@ -43,7 +43,7 @@ app.post('/register', async (req: Request<{}, {}, RegisterRequestBody>, res: Res
     console.log(hash);
     
     // TODO: Save user to database
-    const result = await createAccount(email, password);
+    const result = await createAccount(email, hash);
     
     if ('error' in result) {
       return res.status(400).json({ error: result.error });
