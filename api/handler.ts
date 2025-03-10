@@ -4,11 +4,20 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import { createAccount, sendVerificationEmail } from './services/account';
 import { EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE } from './utils/constants';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 const app = express();
 
 // Add JSON body parser middleware
 app.use(express.json());
+
+// Add interface to extend Express Request
+interface APIGatewayRequest<P = any, ResBody = any, ReqBody = any> extends Request<P, ResBody, ReqBody> {
+  apiGateway?: {
+    event: APIGatewayProxyEvent;
+    context: any;
+  };
+}
 
 interface RegisterRequestBody {
   email: string;
@@ -27,9 +36,12 @@ app.get('/hello', (_req: Request, res: Response) => {
   });
 });
 
-app.post('/register', async (req: Request<{}, {}, RegisterRequestBody>, res: Response) => {
+app.post('/register', async (req: APIGatewayRequest<{}, {}, RegisterRequestBody>, res: Response) => {
   try {
-    const { email, password } = req.body;
+    // TODO: refactor this to use req.body first.
+    const body = req.apiGateway?.event?.body ? JSON.parse(req.apiGateway.event.body) : req.body;
+    
+    const { email, password } = body;
 
     // Basic validation
     if (!email || !password) {
@@ -41,7 +53,6 @@ app.post('/register', async (req: Request<{}, {}, RegisterRequestBody>, res: Res
     // Hash the password with a minimum cost factor for security
     const SALT_ROUNDS = 12; // Industry standard minimum for security
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    console.log(hash);
     
     // TODO: Save user to database
     const result = await createAccount(email, hash);
