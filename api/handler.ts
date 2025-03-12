@@ -9,20 +9,13 @@ import {
   VERIFICATION_REQUIRED_FIELDS_ERROR,
   VERIFICATION_SUCCESS_MESSAGE 
 } from './utils/constants';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { getRequestBody } from './utils/api';
+import { APIGatewayRequest } from './types/api';
 
 const app = express();
 
 // Add JSON body parser middleware
 app.use(express.json());
-
-// Add interface to extend Express Request
-interface APIGatewayRequest<P = any, ResBody = any, ReqBody = any> extends Request<P, ResBody, ReqBody> {
-  apiGateway?: {
-    event: APIGatewayProxyEvent;
-    context: any;
-  };
-}
 
 interface RegisterRequestBody {
   email: string;
@@ -46,12 +39,9 @@ app.get('/hello', (_req: Request, res: Response) => {
   });
 });
 
-app.post('/register', async (req: APIGatewayRequest<{}, {}, RegisterRequestBody>, res: Response) => {
+app.post('/register', async (req: APIGatewayRequest<Record<string, never>, Record<string, never>, RegisterRequestBody>, res: Response) => {
   try {
-    // TODO: refactor this to use req.body first.
-    const body = req.apiGateway?.event?.body ? JSON.parse(req.apiGateway.event.body) : req.body;
-    
-    const { email, password } = body;
+    const { email, password } = getRequestBody<RegisterRequestBody>(req);
 
     // Basic validation
     if (!email || !password) {
@@ -92,9 +82,9 @@ app.post('/register', async (req: APIGatewayRequest<{}, {}, RegisterRequestBody>
   }
 });
 
-app.post('/verify-email', async (req: APIGatewayRequest<{}, {}, VerifyEmailBody>, res: Response) => {
+app.post('/verify-email', async (req: APIGatewayRequest<Record<string, never>, Record<string, never>, VerifyEmailBody>, res: Response) => {
   try {
-    const { code, token } = req.apiGateway?.event?.body ? JSON.parse(req.apiGateway.event.body) : req.body;
+    const { code, token } = getRequestBody<VerifyEmailBody>(req);
 
     if (!token || !code) {
       return res.status(400).json({
