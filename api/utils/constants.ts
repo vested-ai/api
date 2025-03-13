@@ -7,6 +7,9 @@ const VERIFICATION_REQUIRED_FIELDS_ERROR = 'Verification token and code are requ
 const VERIFICATION_FAILED_ERROR = 'Failed to verify email';
 const VERIFICATION_SUCCESS_MESSAGE = 'Email verification successful';
 
+export const INVALID_CREDENTIALS_ERROR = 'Invalid email or password';
+export const EMAIL_NOT_VERIFIED_ERROR = 'Email not verified. Please verify your email before logging in';
+
 export {
     EMAIL_REGEX,
     EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE,

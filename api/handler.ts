@@ -4,10 +4,13 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import { createAccount, sendVerificationEmail } from './services/account';
 import { verifyEmail } from './services/verification';
+import { authenticateUser } from './services/auth';
 import { 
   EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE, 
   VERIFICATION_REQUIRED_FIELDS_ERROR,
-  VERIFICATION_SUCCESS_MESSAGE 
+  VERIFICATION_SUCCESS_MESSAGE,
+  INVALID_CREDENTIALS_ERROR,
+  EMAIL_NOT_VERIFIED_ERROR
 } from './utils/constants';
 import { getRequestBody } from './utils/api';
 import { APIGatewayRequest } from './types/api';
@@ -25,6 +28,11 @@ interface RegisterRequestBody {
 interface VerifyEmailBody {
   code: string;
   token: string;
+}
+
+interface LoginRequestBody {
+  email: string;
+  password: string;
 }
 
 app.get('/', (_req: Request, res: Response) => {
@@ -100,6 +108,36 @@ app.post('/verify-email', async (req: APIGatewayRequest<Record<string, never>, R
 
     return res.status(200).json({
       message: VERIFICATION_SUCCESS_MESSAGE
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Internal server error'
+    });
+  }
+});
+
+app.post('/login', async (req: APIGatewayRequest<Record<string, never>, Record<string, never>, LoginRequestBody>, res: Response) => {
+  try {
+    const { email, password } = getRequestBody<LoginRequestBody>(req);
+
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        error: EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE
+      });
+    }
+
+    const authResult = await authenticateUser(email, password);
+
+    if ('error' in authResult) {
+      if (authResult.error === 'not_verified') {
+        return res.status(403).json({ error: EMAIL_NOT_VERIFIED_ERROR });
+      }
+      return res.status(401).json({ error: INVALID_CREDENTIALS_ERROR });
+    }
+
+    return res.status(200).json({
+      token: authResult.token
     });
   } catch (error) {
     return res.status(500).json({
