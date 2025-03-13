@@ -15,11 +15,14 @@ import {
 import { getRequestBody } from './utils/api';
 import { APIGatewayRequest } from './types/api';
 import { authenticateJWT, AuthenticatedRequest } from './middleware/auth';
+import { v4 as uuidv4 } from 'uuid';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
 // Add JSON body parser middleware
 app.use(express.json());
+app.use(cookieParser());
 
 interface RegisterRequestBody {
   email: string;
@@ -137,8 +140,19 @@ app.post('/login', async (req: APIGatewayRequest<Record<string, never>, Record<s
       return res.status(401).json({ error: INVALID_CREDENTIALS_ERROR });
     }
 
+    // Generate CSRF token
+    const csrfToken = uuidv4();
+
+    // Set CSRF cookie - httpOnly: false so JS can read it
+    res.cookie('csrf-token', csrfToken, {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'strict'
+    });
+
     return res.status(200).json({
-      token: authResult.token
+      token: authResult.token,
+      csrfToken // Send token in response body too
     });
   } catch (error) {
     return res.status(500).json({
