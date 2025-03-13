@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { fetchUser } from './user';
+import { config } from '../config/env';
 
 interface AuthSuccess {
   token: string;
@@ -27,17 +28,13 @@ export async function authenticateUser(email: string, password: string): Promise
     return { error: 'not_verified' };
   }
 
-  // TODO: Move this to environment variable
-  const JWT_SECRET = 'your-secret-key';
-  
   // Create JWT token
   const token = jwt.sign(
     { 
       email: user.email,
-      // Add any other claims you want to include
     },
-    JWT_SECRET,
-    { expiresIn: '24h' }
+    config.jwt.secret,
+    { expiresIn: config.jwt.expiresIn }
   );
 
   return { token };
