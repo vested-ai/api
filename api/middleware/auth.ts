@@ -19,9 +19,16 @@ export const authenticateJWT = async (
 ) => {
   try {
     const authHeader = req.headers.authorization;
+    const csrfToken = req.headers['x-csrf-token'];
+    const cookieCsrfToken = req.cookies['csrf-token'];
 
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'No token provided' });
+    }
+
+    // Verify CSRF token matches cookie
+    if (!csrfToken || !cookieCsrfToken || csrfToken !== cookieCsrfToken) {
+      return res.status(403).json({ error: 'Invalid CSRF token' });
     }
 
     const token = authHeader.split(' ')[1];
@@ -31,7 +38,13 @@ export const authenticateJWT = async (
       req.user = payload;
       next();
     } catch (error) {
-      return res.status(401).json({ error: 'Invalid token' });
+      if (error instanceof jwt.TokenExpiredError) {
+        return res.status(401).json({ error: 'Token expired' });
+      } else if (error instanceof jwt.JsonWebTokenError) {
+        return res.status(401).json({ error: 'Invalid token' });
+      } else {
+        return res.status(401).json({ error: 'Toke verification failed'});
+      }
     }
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' });
