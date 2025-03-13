@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { APIGatewayRequest } from '../types/api';
+import { config } from '../config/env';
 
 interface JWTPayload {
   email: string;
@@ -25,11 +26,8 @@ export const authenticateJWT = async (
 
     const token = authHeader.split(' ')[1];
     
-    // TODO: Move to environment variable
-    const JWT_SECRET = 'your-secret-key';
-
     try {
-      const payload = jwt.verify(token, JWT_SECRET) as JWTPayload;
+      const payload = jwt.verify(token, config.jwt.secret) as JWTPayload;
       req.user = payload;
       next();
     } catch (error) {

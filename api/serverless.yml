@@ -10,6 +10,9 @@ provider:
   runtime: nodejs20.x
   stage: dev
   region: us-east-1
+  environment:
+    JWT_SECRET: ${env:JWT_SECRET}
+    JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
 
 functions:
   api:
