@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { fetchUser } from './user';
 import { config } from '../config/env';
 
@@ -28,13 +28,18 @@ export async function authenticateUser(email: string, password: string): Promise
     return { error: 'not_verified' };
   }
 
+  const signOptions: SignOptions = {
+    expiresIn: config.jwt.expiresIn as any,
+  }
+
+
   // Create JWT token
   const token = jwt.sign(
     { 
       email: user.email,
     },
     config.jwt.secret,
-    { expiresIn: config.jwt.expiresIn }
+    signOptions
   );
 
   return { token };
