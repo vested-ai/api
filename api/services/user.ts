@@ -1,7 +1,5 @@
 import bcrypt from 'bcryptjs';
 
-import bcrypt from 'bcryptjs';
-
 interface User {
   email: string;
   password_hash: string;
