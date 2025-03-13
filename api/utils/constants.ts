@@ -10,6 +10,9 @@ const VERIFICATION_SUCCESS_MESSAGE = 'Email verification successful';
 export const INVALID_CREDENTIALS_ERROR = 'Invalid email or password';
 export const EMAIL_NOT_VERIFIED_ERROR = 'Email not verified. Please verify your email before logging in';
 
+export const NO_TOKEN_ERROR = 'No token provided';
+export const INVALID_TOKEN_ERROR = 'Invalid token';
+
 export {
     EMAIL_REGEX,
     EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE,

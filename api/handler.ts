@@ -14,6 +14,7 @@ import {
 } from './utils/constants';
 import { getRequestBody } from './utils/api';
 import { APIGatewayRequest } from './types/api';
+import { authenticateJWT, AuthenticatedRequest } from './middleware/auth';
 
 const app = express();
 
@@ -145,6 +146,24 @@ app.post('/login', async (req: APIGatewayRequest<Record<string, never>, Record<s
     });
   }
 });
+
+// Example of a protected route
+app.get('/protected', 
+  authenticateJWT,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // req.user contains the decoded JWT payload
+      return res.status(200).json({
+        message: `Hello ${req.user?.email}!`,
+        user: req.user
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: 'Internal server error'
+      });
+    }
+  }
+);
 
 app.use((_req: Request, res: Response) => {
   return res.status(404).json({
