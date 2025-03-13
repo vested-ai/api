@@ -9,4 +9,5 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
+  setupFiles: ['<rootDir>/jest.setup.ts'],
 }; 
