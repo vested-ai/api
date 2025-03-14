@@ -1,4 +1,5 @@
-import { PutCommand } from '@aws-sdk/lib-dynamodb/dist-types/commands/PutCommand';
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
+import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 import { createDynamoDBClient, TableNames } from '../config/database';
 import { isValidEmail } from '../utils/validation';
 import { v4 as uuidv4 } from 'uuid';
@@ -62,7 +63,7 @@ export async function createAccount(
         registrationToken: payload.registrationToken,
       };
     } catch (error) {
-      if (error instanceof ConditionalCheckFailedError) {
+      if (error instanceof ConditionalCheckFailedException) {
         return { error: 'Email already registered' };
       }
       console.error('Error creating account:', error);
