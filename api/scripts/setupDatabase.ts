@@ -10,7 +10,7 @@ async function setupDatabase() {
     dbConfig.endpoint = process.env.DYNAMO_ENDPOINT;
     dbConfig.credentials = {
       accessKeyId: 'dummy',
-      secretAccessKey: 'dummy'
+      secretAccessKey: 'dummy',
     };
   }
 
@@ -21,14 +21,10 @@ async function setupDatabase() {
     await client.send(
       new CreateTableCommand({
         TableName: TableNames.USERS,
-        AttributeDefinitions: [
-          { AttributeName: 'email', AttributeType: 'S' },
-        ],
-        KeySchema: [
-          { AttributeName: 'email', KeyType: 'HASH' },
-        ],
+        AttributeDefinitions: [{ AttributeName: 'email', AttributeType: 'S' }],
+        KeySchema: [{ AttributeName: 'email', KeyType: 'HASH' }],
         BillingMode: 'PAY_PER_REQUEST', // On-demand capacity
-      })
+      }),
     );
     console.log('Users table created successfully');
   } catch (error) {
@@ -45,4 +41,4 @@ if (require.main === module) {
   setupDatabase();
 }
 
-export { setupDatabase }; 
+export { setupDatabase };
