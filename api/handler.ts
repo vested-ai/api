@@ -79,11 +79,11 @@ app.post(
       }
 
       // Send verification email
-      if (!result.verificationCode) {
+      if (!result.registrationToken) {
         return res.status(500).json({ error: 'Verification code not found' });
       }
 
-      const emailResult = await sendVerificationEmail(email, result.verificationCode!);
+      const emailResult = await sendVerificationEmail(email, result.registrationToken!);
 
       if (typeof emailResult === 'object' && 'error' in emailResult) {
         return res.status(500).json({ error: emailResult.error });

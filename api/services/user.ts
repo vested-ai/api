@@ -1,6 +1,6 @@
-import { GetCommand } from '@aws-sdk/lib-dynamodb/dist-types/commands/GetCommand';
+import { GetCommand } from '@aws-sdk/lib-dynamodb';
 import { TableNames } from '../config/database';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb/dist-types';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import bcrypt from 'bcryptjs';
 
 interface User {
