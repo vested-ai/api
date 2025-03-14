@@ -5,6 +5,7 @@ import {
   EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE,
   EMAIL_SERVICE_UNAVAILABLE_ERROR_MESSAGE,
 } from '../utils/constants';
+
 // Define interface for API response
 interface ApiResponse {
   statusCode: number;
@@ -29,7 +30,7 @@ describe('API Handler', () => {
     jest.clearAllMocks();
     // Mock successful responses
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-    (createAccount as jest.Mock).mockResolvedValue({ verificationCode: 'code123', id: 'user123' });
+    (createAccount as jest.Mock).mockResolvedValue({ registrationToken: 'code123', id: 'user123' });
     (sendVerificationEmail as jest.Mock).mockResolvedValue('success');
   });
 
@@ -109,7 +110,7 @@ describe('API Handler', () => {
 
     it('should handle verification email errors', async () => {
       (createAccount as jest.Mock).mockResolvedValue({
-        verificationCode: 'code123',
+        registrationToken: 'code123',
         id: 'user123',
       });
       (sendVerificationEmail as jest.Mock).mockResolvedValue({
@@ -136,7 +137,7 @@ describe('API Handler', () => {
     });
 
     it('should handle missing verification code from account creation', async () => {
-      (createAccount as jest.Mock).mockResolvedValue({ id: 'user123' }); // no verificationCode
+      (createAccount as jest.Mock).mockResolvedValue({ id: 'user123' }); // no registrationToken
 
       const response = (await handler(mockEvent, context)) as ApiResponse;
 

@@ -1,28 +1,54 @@
 import { createAccount, sendVerificationEmail } from '../../services/account';
 import { isValidEmail } from '../../utils/validation';
+import { mockClient } from 'aws-sdk-client-mock';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 
 // Mock the validation utility
-jest.mock('../../utils/validation', () => ({
-  isValidEmail: jest.fn(),
-}));
+jest.mock('../../utils/validation');
+
+// Create DynamoDB mock
+const ddbMock = mockClient(DynamoDBDocumentClient);
 
 describe('Account Service', () => {
-  // Reset mocks before each test
   beforeEach(() => {
+    // Clear all mocks before each test
     jest.clearAllMocks();
+    ddbMock.reset();
   });
 
   describe('createAccount', () => {
-    it('should validate email using validation utility', async () => {
+    it('should return registration token and id for valid inputs', async () => {
+      // Mock validation
       (isValidEmail as jest.Mock).mockReturnValue(true);
-      await createAccount('test@example.com', 'password123');
-      expect(isValidEmail).toHaveBeenCalledWith('test@example.com');
+      
+      // Mock successful DynamoDB put
+      ddbMock.on(PutCommand).resolves({});
+
+      const result = await createAccount('test@example.com', 'hashedPassword123');
+      
+      expect(result).toHaveProperty('registrationToken');
+      expect(result).toHaveProperty('id');
+      
+      // Verify DynamoDB was called with correct parameters
+      const putCommandCalls = ddbMock.commandCalls(PutCommand);
+      expect(putCommandCalls).toHaveLength(1);
+      
+      const putParams = putCommandCalls[0].args[0].input;
+      expect(putParams.Item).toMatchObject({
+        email: 'test@example.com',
+        password: 'hashedPassword123',
+        isEmailVerified: false,
+      });
     });
 
-    it('should return error when email is invalid', async () => {
+    it('should return error for invalid email', async () => {
       (isValidEmail as jest.Mock).mockReturnValue(false);
-      const result = await createAccount('invalid-email', 'password123');
+
+      const result = await createAccount('invalid-email', 'hashedPassword123');
+      
       expect(result).toEqual({ error: 'Invalid email format' });
+      expect(ddbMock.commandCalls(PutCommand)).toHaveLength(0);
     });
 
     it.each([
@@ -32,13 +58,32 @@ describe('Account Service', () => {
       (isValidEmail as jest.Mock).mockReturnValue(true);
       const result = await createAccount('test@example.com', password);
       expect(result).toEqual({ error: 'Password must be at least 4 characters long' });
+      expect(ddbMock.commandCalls(PutCommand)).toHaveLength(0);
     });
 
-    it('should return verification code and id for valid inputs', async () => {
+    it('should return error when email already exists', async () => {
       (isValidEmail as jest.Mock).mockReturnValue(true);
-      const result = await createAccount('test@example.com', 'password123');
-      expect(result).toHaveProperty('verificationCode');
-      expect(result).toHaveProperty('id');
+      
+      // Mock ConditionalCheckFailedException
+      ddbMock.on(PutCommand).rejects(new ConditionalCheckFailedException({
+        message: 'The conditional request failed',
+        $metadata: {}
+      }));
+
+      const result = await createAccount('existing@example.com', 'hashedPassword123');
+      
+      expect(result).toEqual({ error: 'Email already registered' });
+    });
+
+    it('should handle unexpected DynamoDB errors', async () => {
+      (isValidEmail as jest.Mock).mockReturnValue(true);
+      
+      // Mock generic error
+      ddbMock.on(PutCommand).rejects(new Error('Unknown error'));
+
+      const result = await createAccount('test@example.com', 'hashedPassword123');
+      
+      expect(result).toEqual({ error: 'Failed to create account' });
     });
   });
 
