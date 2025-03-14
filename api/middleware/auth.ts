@@ -15,7 +15,7 @@ export interface AuthenticatedRequest extends APIGatewayRequest {
 export const authenticateJWT = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const authHeader = req.headers.authorization;
@@ -32,7 +32,7 @@ export const authenticateJWT = async (
     }
 
     const token = authHeader.split(' ')[1];
-    
+
     try {
       const payload = jwt.verify(token, config.jwt.secret) as JWTPayload;
       req.user = payload;
@@ -43,10 +43,10 @@ export const authenticateJWT = async (
       } else if (error instanceof jwt.JsonWebTokenError) {
         return res.status(401).json({ error: 'Invalid token' });
       } else {
-        return res.status(401).json({ error: 'Toke verification failed'});
+        return res.status(401).json({ error: 'Toke verification failed' });
       }
     }
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' });
   }
-}; 
+};

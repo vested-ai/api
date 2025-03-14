@@ -23,4 +23,4 @@ describe('Validation Utils', () => {
       expect(isValidEmail(email)).toBe(false);
     });
   });
-}); 
+});
