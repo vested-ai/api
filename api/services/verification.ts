@@ -24,4 +24,4 @@ export async function verifyEmail(token: string, code: string): Promise<Verifica
     console.error('Failed to verify email:', error);
     return { error: VERIFICATION_FAILED_ERROR };
   }
-} 
+}

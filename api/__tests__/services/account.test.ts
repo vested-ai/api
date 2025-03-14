@@ -3,7 +3,7 @@ import { isValidEmail } from '../../utils/validation';
 
 // Mock the validation utility
 jest.mock('../../utils/validation', () => ({
-  isValidEmail: jest.fn()
+  isValidEmail: jest.fn(),
 }));
 
 describe('Account Service', () => {
@@ -67,4 +67,4 @@ describe('Account Service', () => {
       expect(result).toBe('not implemented');
     });
   });
-}); 
+});

@@ -11,7 +11,10 @@ interface AuthError {
   error: 'invalid_credentials' | 'not_verified';
 }
 
-export async function authenticateUser(email: string, password: string): Promise<AuthSuccess | AuthError> {
+export async function authenticateUser(
+  email: string,
+  password: string,
+): Promise<AuthSuccess | AuthError> {
   const user = await fetchUser(email);
 
   if (!user) {
@@ -30,17 +33,16 @@ export async function authenticateUser(email: string, password: string): Promise
 
   const signOptions: SignOptions = {
     expiresIn: config.jwt.expiresIn as any,
-  }
-
+  };
 
   // Create JWT token
   const token = jwt.sign(
-    { 
+    {
       email: user.email,
     },
     config.jwt.secret,
-    signOptions
+    signOptions,
   );
 
   return { token };
-} 
+}

@@ -6,7 +6,10 @@ interface AccountResponse {
   error?: string;
 }
 
-export async function createAccount(email: string, password: string): Promise<AccountResponse | { error: string }> {
+export async function createAccount(
+  email: string,
+  password: string,
+): Promise<AccountResponse | { error: string }> {
   try {
     // Validate email
     if (!isValidEmail(email)) {
@@ -21,24 +24,27 @@ export async function createAccount(email: string, password: string): Promise<Ac
     return {
       verificationCode: 'not implemented',
       id: 'not implemented',
-    }
+    };
   } catch (error) {
     console.error('Failed to create account:', error);
     return { error: 'Failed to create account' };
   }
 }
 
-export async function sendVerificationEmail(email: string, verificationCode: string): Promise<string | { error: string }> {
+export async function sendVerificationEmail(
+  email: string,
+  verificationCode: string,
+): Promise<string | { error: string }> {
   try {
     // Validate inputs
     if (!isValidEmail(email)) {
       return { error: 'Invalid email format' };
     }
-    
+
     if (!verificationCode) {
       return { error: 'Missing verification code' };
     }
-    
+
     return 'not implemented';
   } catch (error) {
     console.error('Failed to send verification email:', error);
