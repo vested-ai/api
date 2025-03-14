@@ -43,7 +43,7 @@ export const authenticateJWT = async (
       } else if (error instanceof jwt.JsonWebTokenError) {
         return res.status(401).json({ error: 'Invalid token' });
       } else {
-        return res.status(401).json({ error: 'Toke verification failed' });
+        return res.status(401).json({ error: 'Token verification failed' });
       }
     }
   } catch (error) {
