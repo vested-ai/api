@@ -1,26 +1,29 @@
+import { GetCommand } from '@aws-sdk/lib-dynamodb/dist-types/commands/GetCommand';
+import { TableNames } from '../config/database';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb/dist-types';
 import bcrypt from 'bcryptjs';
 
 interface User {
   email: string;
-  password_hash: string;
-  is_email_verified: boolean;
+  passwordHash: string;
+  isEmailVerified: boolean;
 }
 
-export async function fetchUser(email: string): Promise<User | null> {
-  // TODO: Fetch user from database using email
-  // For now, we'll simulate a database response
+export async function fetchUser(
+  email: string,
+  client: DynamoDBDocumentClient,
+): Promise<User | null> {
+  try {
+    const result = await client.send(
+      new GetCommand({
+        TableName: TableNames.USERS,
+        Key: { email },
+      }),
+    );
 
-  // For development only - in production we'd lookup the user in a database
-  if (email !== 'test@example.com') {
-    return null; // User not found
+    return (result.Item as User) || null;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
   }
-
-  const mockUser = {
-    email: 'test@example.com',
-    password_hash: await bcrypt.hash('password123', 12),
-    is_email_verified: true,
-  };
-
-  // TODO: Replace with actual database lookup
-  return mockUser;
 }
