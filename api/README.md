@@ -43,6 +43,12 @@ Backend API for the Vested app.
   ```bash
   npm install -g yarn
   ```
+- AWS CLI
+  ```bash
+  brew install awscli
+
+  # See "AWS CLI Setup (Mac)" below for more details
+  ```
 
 ### Services
 The application uses several services that run locally via Docker:

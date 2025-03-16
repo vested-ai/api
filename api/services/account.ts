@@ -105,6 +105,8 @@ export async function sendVerificationEmail(
       }),
     );
 
+    const registrationLink = `${process.env.FRONTEND_URL}/verify-email?token=${registrationToken}`;
+
     // Send the email
     await sendEmail({
       to: email,
@@ -112,6 +114,8 @@ export async function sendVerificationEmail(
       text: `Your verification code is: ${verificationCode}. This code will expire in 15 minutes.`,
       html: `
         <h1>Email Verification</h1>
+        <p>Complete your registration by following the link below and entering the verification code:</p>
+        <p>Link: <a href="${registrationLink}">${registrationLink}</a></p>
         <p>Your verification code is: <strong>${verificationCode}</strong></p>
         <p>This code will expire in 15 minutes.</p>
       `,
