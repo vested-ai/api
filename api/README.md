@@ -11,92 +11,87 @@ authorName: 'Serverless, Inc.'
 authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 -->
 
-# Serverless Framework Node Express API on AWS
+# Vested API
 
-This template demonstrates how to develop and deploy a simple Node Express API service running on AWS Lambda using the Serverless Framework.
+Backend API for the Vested app.
 
-This template configures a single function, `api`, which is responsible for handling all incoming requests using the `httpApi` event. To learn more about `httpApi` event configuration options, please refer to [httpApi event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/). As the event is configured in a way to accept all incoming requests, the Express.js framework is responsible for routing and handling requests internally. This implementation uses the `serverless-http` package to transform the incoming event request payloads to payloads compatible with Express.js. To learn more about `serverless-http`, please refer to the [serverless-http README](https://github.com/dougmoscrop/serverless-http).
+## Local Development Setup
 
-## Usage
+### Prerequisites
+- Node.js (v20 or later)
+- Docker and Docker Compose
+- Yarn package manager
 
-### Deployment
+### Services
+The application uses several services that run locally via Docker:
 
-Install dependencies with:
+1. **DynamoDB Local**
+   - Port: 8000
+   - Web Interface: http://localhost:8000/shell
+   - Used for local database development
 
+2. **MailHog (Email Testing)**
+   - SMTP Port: 1025
+   - Web Interface: http://localhost:8025
+   - Used for testing email functionality locally
+   - All emails sent during development are captured here instead of being sent to real addresses
+
+### Getting Started
+
+1. Install dependencies:
+
+```bash
+yarn install
 ```
-npm install
-```
-
-and then deploy with:
-
-```
-serverless deploy
-```
-
-After running deploy, you should see output similar to:
-
-```
-Deploying "aws-node-express-api" to stage "dev" (us-east-1)
-
-✔ Service deployed to stack aws-node-express-api-dev (96s)
-
-endpoint: ANY - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com
-functions:
-  api: aws-node-express-api-dev-api (2.3 kB)
-```
-
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [`httpApi` event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/).
-
-### Invocation
-
-After successful deployment, you can call the created application via HTTP:
-
-```
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
-
-Which should result in the following response:
-
-```json
-{ "message": "Hello from root!" }
-```
-
-### Local development
-
-#### DynamoDB Local Setup
-
-Before starting the API, you'll need to set up DynamoDB locally:
-
-1. Prerequisites:
-   - Docker and Docker Compose
-   - AWS CLI (optional, but useful for local testing)
 
 2. Environment Setup:
-   Create a `.env` file in the root directory:
-   ```
-   AWS_REGION=local
-   AWS_ACCESS_KEY_ID=dummy
-   AWS_SECRET_ACCESS_KEY=dummy
-   DYNAMO_ENDPOINT=http://localhost:8000
-   NODE_ENV=development
-   ```
 
-3. Start DynamoDB Local:
-   ```
-   npm run dynamodb:start
-   ```
+```bash
+# Create a `.env` file in the api/ directory:
+cp .env.example api/.env
+```
 
-4. Initialize the database tables:
-   ```
-   npm run db:setup
-   ```
+3. Start database and SMTP server:
 
-5. To stop DynamoDB Local when done:
-   ```
-   npm run dynamodb:stop
-   ```
+```bash
+yarn run db:reset
+```
 
-#### Verifying DynamoDB Setup
+3. Start the API server:
+
+```bash
+yarn run dev
+```
+
+The API will be available at http://localhost:3000
+
+### Email Testing
+
+During development, all emails are sent to MailHog instead of real email addresses. This allows you to:
+- View all sent emails in a web interface
+- Test email formatting and content
+- Ensure email functionality without sending real emails
+
+To view sent emails:
+1. Ensure Docker services are running (`yarn db:start`)
+2. Open http://localhost:8025 in your browser
+3. Any emails sent by the application will appear here
+
+### Available Scripts
+
+- `yarn dev` - Start the development server
+- `yarn test` - Run tests
+- `yarn test:watch` - Run tests in watch mode
+- `yarn build` - Build the application
+- `yarn type-check` - Check TypeScript types
+- `yarn lint` - Run ESLint
+- `yarn lint:fix` - Fix ESLint issues
+- `yarn db:start` - Start Docker services (DynamoDB Local and MailHog)
+- `yarn db:stop` - Stop Docker services
+- `yarn db:setup` - Set up database tables
+- `yarn db:reset` - Reset Docker services and database tables
+
+### Verifying DynamoDB Setup
 
 If you have AWS CLI installed, you can verify the setup:
 ```bash
@@ -107,7 +102,7 @@ aws dynamodb list-tables --endpoint-url http://localhost:8000
 aws dynamodb scan --table-name Users --endpoint-url http://localhost:8000
 ```
 
-#### AWS CLI Setup (Mac)
+### AWS CLI Setup (Mac)
 
 1. Install AWS CLI:
    ```bash
@@ -146,7 +141,7 @@ aws dynamodb scan --table-name Users --endpoint-url http://localhost:8000
      --endpoint-url http://localhost:8000
    ```
 
-#### AWS CLI Common Commands for Local Development
+### AWS CLI Common Commands for Local Development
 
 ```bash
 # List all tables
@@ -176,7 +171,7 @@ aws dynamodb delete-item \
   --endpoint-url http://localhost:8000
 ```
 
-#### AWS CLI Troubleshooting
+### AWS CLI Troubleshooting
 
 1. If `aws configure` settings aren't being recognized:
    - Check your credentials file:
@@ -203,9 +198,3 @@ aws dynamodb delete-item \
      ```bash
      docker logs dynamodb-local
      ```
-
-#### Running the API
-
-The easiest way to develop and test your function is to use the `dev` command:
-
-```
