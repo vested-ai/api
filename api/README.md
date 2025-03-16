@@ -19,8 +19,30 @@ Backend API for the Vested app.
 
 ### Prerequisites
 - Node.js (v20 or later)
+  ```bash
+  # macOS/Linux using nvm
+  nvm install 20
+  nvm use 20
+  
+  # Windows
+  # Download and install from https://nodejs.org/
+  ```
 - Docker and Docker Compose
+  ```bash
+  # macOS
+  brew install docker docker-compose
+  
+  # Linux
+  sudo apt-get update
+  sudo apt-get install docker.io docker-compose
+  
+  # Windows
+  # Download and install Docker Desktop from https://www.docker.com/products/docker-desktop
+  ```
 - Yarn package manager
+  ```bash
+  npm install -g yarn
+  ```
 
 ### Services
 The application uses several services that run locally via Docker:
