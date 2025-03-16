@@ -19,8 +19,6 @@ import { v4 as uuidv4 } from 'uuid';
 import cookieParser from 'cookie-parser';
 
 require('dotenv').config();
-console.log(process.env) // remove this after you've confirmed it is working
-
 const app = express();
 
 // Add JSON body parser middleware
