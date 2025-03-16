@@ -18,11 +18,25 @@ import { authenticateJWT, AuthenticatedRequest } from './middleware/auth';
 import { v4 as uuidv4 } from 'uuid';
 import cookieParser from 'cookie-parser';
 
+require('dotenv').config();
+console.log(process.env) // remove this after you've confirmed it is working
+
 const app = express();
 
 // Add JSON body parser middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// Add CORS headers for local development
+if (process.env.NODE_ENV !== 'production') {
+  app.use((_req: Request, res: Response, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token');
+    next();
+  });
+}
 
 interface RegisterRequestBody {
   email: string;
