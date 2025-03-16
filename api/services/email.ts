@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer, { TransportOptions } from 'nodemailer';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 // Generate a 6-digit verification code
@@ -22,11 +22,9 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
       host: 'localhost',
       port: 1025, // Default Mailhog SMTP port
       secure: false,
-      auth: {
-        user: '',
-        pass: '',
-      },
-    });
+      ignoreTLS: true,
+      auth: null
+    } as TransportOptions);
 
     await transporter.sendMail({
       from: 'noreply@yourdomain.com',
