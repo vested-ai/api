@@ -12,6 +12,7 @@
     "db:start": "docker-compose up -d",
     "db:stop": "docker-compose down",
     "db:setup": "ts-node scripts/setupDatabase.ts",
+    "db:reset": "docker-compose down && docker-compose up -d && ts-node scripts/setupDatabase.ts",
     "dev": "serverless offline start"
   },
   "dependencies": {
