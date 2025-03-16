@@ -3,19 +3,41 @@ org: allvested
 # "app" enables Serverless Framework Dashboard features and sharing them with other Services.
 app: api
 # "service" is the name of this project. This will also be added to your AWS resource names.
-service: api
+service: vested-api
+
+useDotenv: true
 
 provider:
   name: aws
   runtime: nodejs20.x
-  stage: dev
-  region: us-east-1
+  stage: ${opt:stage, 'development'}
+  region: ${opt:region, 'us-east-1'}
   environment:
     JWT_SECRET: ${env:JWT_SECRET}
     JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
+    IS_LOCAL_ENVIRONMENT: ${self:custom.IS_LOCAL_ENVIRONMENT}
+
+plugins:
+  - serverless-offline
+  - serverless-plugin-typescript
 
 functions:
   api:
     handler: handler.handler
     events:
-      - httpApi: "*"
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+      - http:
+          path: /
+          method: ANY
+          cors: true
+
+custom:
+  IS_LOCAL_ENVIRONMENT: ${env:IS_LOCAL_ENVIRONMENT, 'true'}
+  serverless-offline:
+    httpPort: 3000
+
+build:
+  esbuild: false
