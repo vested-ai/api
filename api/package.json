@@ -25,7 +25,9 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "serverless-http": "^3.2.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "@aws-sdk/client-ses": "^3.474.0",
+    "nodemailer": "^6.9.7"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
@@ -47,7 +49,8 @@
     "serverless-plugin-typescript": "^2.1.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "@types/nodemailer": "^6.4.14"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
