@@ -1,23 +1,32 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 
-export function createDynamoDBClient() {
-  const dbConfig: {
-    endpoint?: string;
-    region: string;
-    credentials?: { accessKeyId: string; secretAccessKey: string };
-  } = {
-    region: process.env.AWS_REGION || 'us-east-1',
-  };
+const isLocalEnvironment = process.env.IS_LOCAL_ENVIRONMENT || process.env.NODE_ENV === 'development';
 
+type DbConfig = {
+  endpoint?: string;
+  region: string;
+  credentials?: { accessKeyId: string; secretAccessKey: string };
+  tls?: boolean;
+  retryMode?: string;
+};
+
+export function createDynamoDBClient() {
   // Use local endpoint for development
-  if (process.env.NODE_ENV === 'development') {
-    dbConfig.endpoint = process.env.DYNAMO_ENDPOINT;
-    dbConfig.credentials = {
-      accessKeyId: 'dummy',
-      secretAccessKey: 'dummy',
-    };
-  }
+  const dbConfig: DbConfig = isLocalEnvironment 
+    ? {
+        region: 'localhost',
+        endpoint: process.env.DYNAMO_ENDPOINT || 'http://localhost:8000',
+        credentials: {
+          accessKeyId: 'dummy',
+          secretAccessKey: 'dummy',
+        },
+        tls: false,
+        retryMode: 'standard',
+      }
+    : {
+      region: process.env.AWS_REGION || 'us-east-1',
+    }
 
   const client = new DynamoDBClient(dbConfig);
 
