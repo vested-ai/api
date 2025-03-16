@@ -23,7 +23,7 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
       port: 1025, // Default Mailhog SMTP port
       secure: false,
       ignoreTLS: true,
-      auth: null
+      auth: null,
     } as TransportOptions);
 
     await transporter.sendMail({
@@ -33,7 +33,7 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
   } else {
     // Use AWS SES in production
     const sesClient = new SESClient({ region: process.env.AWS_REGION || 'us-east-1' });
-    
+
     const command = new SendEmailCommand({
       Destination: {
         ToAddresses: [config.to],
@@ -59,4 +59,4 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
 
     await sesClient.send(command);
   }
-} 
+}

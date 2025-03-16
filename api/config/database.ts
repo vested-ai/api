@@ -1,7 +1,8 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 
-const isLocalEnvironment = process.env.IS_LOCAL_ENVIRONMENT || process.env.NODE_ENV === 'development';
+const isLocalEnvironment =
+  process.env.IS_LOCAL_ENVIRONMENT || process.env.NODE_ENV === 'development';
 
 type DbConfig = {
   endpoint?: string;
@@ -13,7 +14,7 @@ type DbConfig = {
 
 export function createDynamoDBClient() {
   // Use local endpoint for development
-  const dbConfig: DbConfig = isLocalEnvironment 
+  const dbConfig: DbConfig = isLocalEnvironment
     ? {
         region: 'localhost',
         endpoint: process.env.DYNAMO_ENDPOINT || 'http://localhost:8000',
@@ -25,8 +26,8 @@ export function createDynamoDBClient() {
         retryMode: 'standard',
       }
     : {
-      region: process.env.AWS_REGION || 'us-east-1',
-    }
+        region: process.env.AWS_REGION || 'us-east-1',
+      };
 
   const client = new DynamoDBClient(dbConfig);
 
