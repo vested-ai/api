@@ -1,9 +1,10 @@
 import nodemailer, { TransportOptions } from 'nodemailer';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import crypto from 'crypto';
 
 // Generate a 6-digit verification code
 export function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 interface EmailConfig {
