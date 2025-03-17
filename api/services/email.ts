@@ -27,10 +27,16 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
       auth: null,
     } as TransportOptions);
 
-    await transporter.sendMail({
-      from: 'noreply@yourdomain.com',
-      ...config,
-    });
+    try {
+      await transporter.sendMail({
+        from: 'noreply@yourdomain.com',
+        ...config,
+      });
+      console.log(`Email send via Mailhog to ${config.to}`);
+    } catch (error) {
+      console.error(`Error sending email via Mailhog: ${error}`);
+      throw new Error(`Failed to send email: ${error}`);
+    }
   } else {
     // Use AWS SES in production
     const sesClient = new SESClient({ region: process.env.AWS_REGION || 'us-east-1' });
