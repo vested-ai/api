@@ -12,15 +12,28 @@ interface ApiResponse {
   body: string;
 }
 
-// Mock external dependencies
+// Mock bcrypt
+jest.mock('bcryptjs', () => ({
+  default: {
+    hash: jest.fn().mockResolvedValue('hashedPassword'),
+  },
+}));
+
+// Mock services with implementations
 jest.mock('../services/account', () => ({
   createAccount: jest.fn(),
   sendVerificationEmail: jest.fn(),
 }));
 
-jest.mock('bcryptjs', () => ({
-  hash: jest.fn(),
-}));
+// Create mock functions
+const mockedCreateAccount = jest.fn();
+const mockedSendVerificationEmail = jest.fn();
+const mockedBcryptHash = jest.fn().mockResolvedValue('hashedPassword');
+
+// Assign mock implementations
+(createAccount as jest.Mock) = mockedCreateAccount;
+(sendVerificationEmail as jest.Mock) = mockedSendVerificationEmail;
+(bcrypt.hash as jest.Mock) = mockedBcryptHash;
 
 describe('API Handler', () => {
   let mockEvent: any;
@@ -28,10 +41,8 @@ describe('API Handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock successful responses
-    (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-    (createAccount as jest.Mock).mockResolvedValue({ registrationToken: 'code123', id: 'user123' });
-    (sendVerificationEmail as jest.Mock).mockResolvedValue('success');
+    mockedCreateAccount.mockResolvedValue({ registrationToken: 'code123', id: 'user123' });
+    mockedSendVerificationEmail.mockResolvedValue('success');
   });
 
   describe('GET /', () => {
@@ -71,9 +82,9 @@ describe('API Handler', () => {
     it('should register a new user successfully', async () => {
       const response = (await handler(mockEvent, context)) as ApiResponse;
 
-      expect(bcrypt.hash).toHaveBeenCalledWith('password123', 12);
-      expect(createAccount).toHaveBeenCalledWith('test@example.com', 'hashedPassword');
-      expect(sendVerificationEmail).toHaveBeenCalledWith('test@example.com', 'code123');
+      expect(mockedBcryptHash).toHaveBeenCalledWith('password123', 12);
+      expect(mockedCreateAccount).toHaveBeenCalledWith('test@example.com', 'hashedPassword');
+      expect(mockedSendVerificationEmail).toHaveBeenCalledWith('test@example.com', 'code123');
 
       expect(response.statusCode).toBe(201);
       expect(JSON.parse(response.body)).toEqual({

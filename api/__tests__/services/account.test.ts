@@ -3,14 +3,21 @@ import { isValidEmail } from '../../utils/validation';
 import { mockClient } from 'aws-sdk-client-mock';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
+import { generateVerificationCode, sendEmail } from '../../services/email';
 
 // Setup proper TypeScript Jest mocks
-jest.mock('../../utils/validation', () => ({
-  isValidEmail: jest.fn(),
-}));
+jest.mock('../../utils/validation');
+jest.mock('../../services/email');
 
-// TypeScript type for mocked functions
-const mockedIsValidEmail = jest.mocked(isValidEmail);
+// Create mock functions
+const mockedIsValidEmail = jest.fn();
+const mockedGenerateVerificationCode = jest.fn();
+const mockedSendEmail = jest.fn();
+
+// Assign mock implementations
+(isValidEmail as jest.Mock) = mockedIsValidEmail;
+(generateVerificationCode as jest.Mock) = mockedGenerateVerificationCode;
+(sendEmail as jest.Mock) = mockedSendEmail;
 
 // Create DynamoDB mock
 const ddbMock = mockClient(DynamoDBDocumentClient);
