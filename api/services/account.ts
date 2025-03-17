@@ -102,6 +102,7 @@ export async function sendVerificationEmail(
           ':code': verificationCode,
           ':expiry': new Date(Date.now() + 15 * 60 * 1000).toISOString(), // 15 minutes expiry
         },
+        ConditionExpression: 'registrationToken = :token',
       }),
     );
 
