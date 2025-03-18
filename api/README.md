@@ -162,7 +162,7 @@ aws dynamodb scan --table-name Users --endpoint-url http://localhost:8000
 5. Test AWS CLI with DynamoDB Local:
    ```bash
    # Make sure DynamoDB Local is running first
-   npm run dynamodb:start
+   aws run dynamodb:start
 
    # Test connection
    aws dynamodb list-tables \
@@ -220,7 +220,7 @@ aws dynamodb delete-item \
      ```
 
 3. If DynamoDB commands fail:
-   - Ensure you're including `--endpoint-url http://localhost:8000`
+   - Ensure you're including `--endpoint-url http://localhost:8000` on a new line
    - Verify DynamoDB Local is running (`docker ps`)
    - Check DynamoDB Local logs:
      ```bash
