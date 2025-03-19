@@ -1,24 +1,72 @@
+import { GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
+import { createDynamoDBClient, TableNames } from '../config/database';
 import { VERIFICATION_REQUIRED_FIELDS_ERROR, VERIFICATION_FAILED_ERROR } from '../utils/constants';
+
+const dynamoDB = createDynamoDBClient();
 
 interface VerificationResponse {
   success?: boolean;
   error?: string;
 }
 
-export async function verifyEmail(token: string, code: string): Promise<VerificationResponse> {
+export async function verifyEmail(
+  email: string,
+  token: string,
+  code: string,
+): Promise<VerificationResponse> {
   try {
     // Validate inputs
-    if (!token || !code) {
+    if (!email || !token || !code) {
       return { error: VERIFICATION_REQUIRED_FIELDS_ERROR };
     }
 
-    // TODO: Implement these database operations:
-    // 1. Look up user by verification token
-    // 2. Compare provided code with stored code
-    // 3. If match, update user: set is_email_verified=true, clear verification_token and code
-    // 4. If no match or token expired, return error
+    // Look up user by email
+    const { Item: user } = await dynamoDB.send(
+      new GetItemCommand({
+        TableName: TableNames.USERS,
+        Key: {
+          email: { S: email }
+        }
+      })
+    );
 
-    // Stubbed success response
+    if (!user) {
+      return { error: 'User not found' };
+    }
+
+    // Verify registration token
+    if (!user.registrationToken?.S || user.registrationToken.S !== token) {
+      return { error: 'Invalid registration token' };
+    }
+
+    // Verify code
+    if (!user.verificationCode?.S || user.verificationCode.S !== code) {
+      return { error: 'Invalid verification code' };
+    }
+
+    // Check if verification code has expired
+    if (!user.verificationCodeExpiry?.S) {
+      return { error: 'Verification code expiry not found' };
+    }
+
+    if (new Date(user.verificationCodeExpiry.S) < new Date()) {
+      return { error: 'Verification code has expired' };
+    }
+
+    // Update user record to mark email as verified and clear verification data
+    await dynamoDB.send(
+      new UpdateItemCommand({
+        TableName: TableNames.USERS,
+        Key: { 
+          email: { S: email }
+        },
+        UpdateExpression: 'SET isEmailVerified = :verified REMOVE verificationCode, verificationCodeExpiry, registrationToken',
+        ExpressionAttributeValues: {
+          ':verified': { BOOL: true }
+        }
+      })
+    );
+
     return { success: true };
   } catch (error) {
     console.error('Failed to verify email:', error);
