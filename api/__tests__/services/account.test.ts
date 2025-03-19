@@ -43,10 +43,10 @@ describe('Account Service', () => {
       expect(result).toHaveProperty('id');
 
       // Verify DynamoDB was called with correct parameters
-      const putCommandCalls = ddbMock.commandCalls(PutItemCommand);
-      expect(putCommandCalls).toHaveLength(1);
+      const putItemCommandCalls = ddbMock.commandCalls(PutItemCommand);
+      expect(putItemCommandCalls).toHaveLength(1);
 
-      const putParams = putCommandCalls[0].args[0].input;
+      const putParams = putItemCommandCalls[0].args[0].input;
       expect(putParams.Item).toMatchObject({
         email: 'test@example.com',
         password: 'hashedPassword123',
@@ -60,7 +60,7 @@ describe('Account Service', () => {
       const result = await createAccount('invalid-email', 'hashedPassword123');
 
       expect(result).toEqual({ error: 'Invalid email format' });
-      expect(ddbMock.commandCalls(PutCommand)).toHaveLength(0);
+      expect(ddbMock.commandCalls(PutItemCommand)).toHaveLength(0);
     });
 
     it.each([
@@ -70,7 +70,7 @@ describe('Account Service', () => {
       mockedIsValidEmail.mockReturnValue(true);
       const result = await createAccount('test@example.com', password);
       expect(result).toEqual({ error: 'Password must be at least 4 characters long' });
-      expect(ddbMock.commandCalls(PutCommand)).toHaveLength(0);
+      expect(ddbMock.commandCalls(PutItemCommand)).toHaveLength(0);
     });
 
     it('should return error when email already exists', async () => {
