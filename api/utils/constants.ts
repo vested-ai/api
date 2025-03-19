@@ -4,7 +4,7 @@ const EMAIL_REGEX =
 const EMAIL_PASSWORD_VALIDATION_ERROR_MESSAGE = 'Email and password are required';
 const EMAIL_SERVICE_UNAVAILABLE_ERROR_MESSAGE = 'Email service unavailable';
 const VERIFICATION_ERROR_MESSAGE = 'Invalid or expired verification token';
-const VERIFICATION_REQUIRED_FIELDS_ERROR = 'Verification token and code are required';
+const VERIFICATION_REQUIRED_FIELDS_ERROR = 'Email, registration token and code are required';
 const VERIFICATION_FAILED_ERROR = 'Failed to verify email';
 const VERIFICATION_SUCCESS_MESSAGE = 'Email verification successful';
 

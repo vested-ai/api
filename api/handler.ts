@@ -44,6 +44,7 @@ interface RegisterRequestBody {
 interface VerifyEmailBody {
   code: string;
   token: string;
+  email: string;
 }
 
 interface LoginRequestBody {
@@ -119,15 +120,15 @@ app.post(
     res: Response,
   ) => {
     try {
-      const { code, token } = getRequestBody<VerifyEmailBody>(req);
+      const { code, token, email } = getRequestBody<VerifyEmailBody>(req);
 
-      if (!token || !code) {
+      if (!token || !code || !email) {
         return res.status(400).json({
           error: VERIFICATION_REQUIRED_FIELDS_ERROR,
         });
       }
 
-      const result = await verifyEmail(token, code);
+      const result = await verifyEmail(email, token, code);
 
       if ('error' in result) {
         return res.status(500).json({ error: result.error });
