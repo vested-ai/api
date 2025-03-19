@@ -1,9 +1,9 @@
-import { PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 import { createDynamoDBClient, TableNames } from '../config/database';
 import { isValidEmail } from '../utils/validation';
 import { v4 as uuidv4 } from 'uuid';
 import { generateVerificationCode, sendEmail } from './email';
+import { PutItemCommand, UpdateItemCommand, AttributeValue } from '@aws-sdk/client-dynamodb';
 
 interface Account {
   email: string;
@@ -47,7 +47,7 @@ export async function createAccount(
 
     try {
       await dynamoDB.send(
-        new PutCommand({
+        new PutItemCommand({
           TableName: TableNames.USERS,
           Item: {
             ...payload,
@@ -94,13 +94,15 @@ export async function sendVerificationEmail(
 
     // Store the verification code in DynamoDB
     await dynamoDB.send(
-      new UpdateCommand({
+      new UpdateItemCommand({
         TableName: TableNames.USERS,
-        Key: { email },
+        Key: {
+          email: { S: email },
+        },
         UpdateExpression: 'SET verificationCode = :code, verificationCodeExpiry = :expiry',
         ExpressionAttributeValues: {
-          ':code': verificationCode,
-          ':expiry': new Date(Date.now() + 15 * 60 * 1000).toISOString(), // 15 minutes expiry
+          ':code': { S: verificationCode },
+          ':expiry': { S: new Date(Date.now() + 15 * 60 * 1000).toISOString() }, // 15 minutes expiry
         },
         ConditionExpression: 'registrationToken = :token',
       }),
