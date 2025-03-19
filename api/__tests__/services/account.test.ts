@@ -1,8 +1,8 @@
 import { createAccount, sendVerificationEmail } from '../../services/account';
 import { isValidEmail } from '../../utils/validation';
 import { mockClient } from 'aws-sdk-client-mock';
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
-import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { ConditionalCheckFailedException, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { generateVerificationCode, sendEmail } from '../../services/email';
 
 // Setup proper TypeScript Jest mocks
@@ -35,7 +35,7 @@ describe('Account Service', () => {
       mockedIsValidEmail.mockReturnValue(true);
 
       // Mock successful DynamoDB put
-      ddbMock.on(PutCommand).resolves({});
+      ddbMock.on(PutItemCommand).resolves({});
 
       const result = await createAccount('test@example.com', 'hashedPassword123');
 
@@ -43,7 +43,7 @@ describe('Account Service', () => {
       expect(result).toHaveProperty('id');
 
       // Verify DynamoDB was called with correct parameters
-      const putCommandCalls = ddbMock.commandCalls(PutCommand);
+      const putCommandCalls = ddbMock.commandCalls(PutItemCommand);
       expect(putCommandCalls).toHaveLength(1);
 
       const putParams = putCommandCalls[0].args[0].input;
@@ -77,7 +77,7 @@ describe('Account Service', () => {
       mockedIsValidEmail.mockReturnValue(true);
 
       // Mock ConditionalCheckFailedException
-      ddbMock.on(PutCommand).rejects(
+      ddbMock.on(PutItemCommand).rejects(
         new ConditionalCheckFailedException({
           message: 'The conditional request failed',
           $metadata: {},
@@ -91,9 +91,10 @@ describe('Account Service', () => {
 
     it('should handle unexpected DynamoDB errors', async () => {
       mockedIsValidEmail.mockReturnValue(true);
+      jest.spyOn(console, 'error').mockImplementation(() => {}); // Suppress console.error
 
       // Mock generic error
-      ddbMock.on(PutCommand).rejects(new Error('Unknown error'));
+      ddbMock.on(PutItemCommand).rejects(new Error('Unknown error'));
 
       const result = await createAccount('test@example.com', 'hashedPassword123');
 
