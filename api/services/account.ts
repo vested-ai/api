@@ -29,23 +29,29 @@ type DynamoDBAttributeValue = {
   // Add other DynamoDB types as needed
 };
 
-function serializeDynamoDBItem(item: Record<string, any>, options?: any): Record<string, AttributeValue> {
-  return Object.entries(item).reduce((acc, [key, value]) => {
-    if (value === undefined || value === null) {
-      return acc;
-    }
+function serializeDynamoDBItem(
+  item: Record<string, any>,
+  options?: any,
+): Record<string, AttributeValue> {
+  return Object.entries(item).reduce(
+    (acc, [key, value]) => {
+      if (value === undefined || value === null) {
+        return acc;
+      }
 
-    if (typeof value === 'string') {
-      acc[options?.expressionKey ? ':'.concat(key) : key] = { S: value };
-    } else if (typeof value === 'number') {
-      acc[options?.expressionKey ? ':'.concat(key) : key] = { N: value.toString() };
-    } else if (typeof value === 'boolean') {
-      acc[options?.expressionKey ? ':'.concat(key) : key] = { BOOL: value };
-    }
-    // Add more type conversions as needed
-    
-    return acc;
-  }, {} as Record<string, AttributeValue>);
+      if (typeof value === 'string') {
+        acc[options?.expressionKey ? ':'.concat(key) : key] = { S: value };
+      } else if (typeof value === 'number') {
+        acc[options?.expressionKey ? ':'.concat(key) : key] = { N: value.toString() };
+      } else if (typeof value === 'boolean') {
+        acc[options?.expressionKey ? ':'.concat(key) : key] = { BOOL: value };
+      }
+      // Add more type conversions as needed
+
+      return acc;
+    },
+    {} as Record<string, AttributeValue>,
+  );
 }
 
 export async function createAccount(
@@ -124,8 +130,8 @@ export async function sendVerificationEmail(
       const payload = {
         code: verificationCode,
         expiry: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-        token: registrationToken,        
-      }
+        token: registrationToken,
+      };
 
       await dynamoDB.send(
         new UpdateItemCommand({
@@ -133,8 +139,8 @@ export async function sendVerificationEmail(
           Key: serializeDynamoDBItem({ email }),
           UpdateExpression: 'SET verificationCode = :code, verificationCodeExpiry = :expiry',
           ExpressionAttributeValues: serializeDynamoDBItem(payload, { expressionKey: true }),
-          ConditionExpression: 'registrationToken = :token'
-        })
+          ConditionExpression: 'registrationToken = :token',
+        }),
       );
     } catch (error) {
       console.error('Test:', error);
