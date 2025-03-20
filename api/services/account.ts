@@ -140,7 +140,7 @@ export async function sendVerificationEmail(
         }),
       );
     } catch (error) {
-      console.error('Test:', error);
+      console.error('Failed to update verification code in database:', error);
       return { error: 'Failed to send verification email' };
     }
 
