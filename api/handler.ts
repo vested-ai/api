@@ -185,6 +185,7 @@ app.post(
         csrfToken, // Send token in response body too
       });
     } catch (error) {
+      console.error(error);
       return res.status(500).json({
         error: 'Internal server error',
       });
