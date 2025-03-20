@@ -20,6 +20,10 @@ interface AccountResponse {
   error?: string;
 }
 
+interface SerializationOptions {
+  expressionKey?: boolean;
+}
+
 const dynamoDB = createDynamoDBClient();
 
 type DynamoDBAttributeValue = {
@@ -31,7 +35,7 @@ type DynamoDBAttributeValue = {
 
 function serializeDynamoDBItem(
   item: Record<string, any>,
-  options?: any,
+  options?: SerializationOptions,
 ): Record<string, AttributeValue> {
   return Object.entries(item).reduce(
     (acc, [key, value]) => {
