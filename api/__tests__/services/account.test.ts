@@ -48,9 +48,9 @@ describe('Account Service', () => {
 
       const putParams = putItemCommandCalls[0].args[0].input;
       expect(putParams.Item).toMatchObject({
-        email: 'test@example.com',
-        password: 'hashedPassword123',
-        isEmailVerified: false,
+        email: { S: 'test@example.com' },
+        password: { S: 'hashedPassword123' },
+        isEmailVerified: { BOOL: false },
       });
     });
 
