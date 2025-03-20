@@ -22,6 +22,32 @@ interface AccountResponse {
 
 const dynamoDB = createDynamoDBClient();
 
+type DynamoDBAttributeValue = {
+  S?: string;
+  N?: string;
+  BOOL?: boolean;
+  // Add other DynamoDB types as needed
+};
+
+function serializeDynamoDBItem(item: Record<string, any>, options?: any): Record<string, AttributeValue> {
+  return Object.entries(item).reduce((acc, [key, value]) => {
+    if (value === undefined || value === null) {
+      return acc;
+    }
+
+    if (typeof value === 'string') {
+      acc[options?.expressionKey ? ':'.concat(key) : key] = { S: value };
+    } else if (typeof value === 'number') {
+      acc[options?.expressionKey ? ':'.concat(key) : key] = { N: value.toString() };
+    } else if (typeof value === 'boolean') {
+      acc[options?.expressionKey ? ':'.concat(key) : key] = { BOOL: value };
+    }
+    // Add more type conversions as needed
+    
+    return acc;
+  }, {} as Record<string, AttributeValue>);
+}
+
 export async function createAccount(
   email: string,
   hashedPassword: string,
@@ -37,23 +63,23 @@ export async function createAccount(
       return { error: 'Password must be at least 4 characters long' };
     }
 
-    const payload: any = {
+    const payload = {
       id: uuidv4(),
       email,
       password: hashedPassword,
       isEmailVerified: false,
       registrationToken: uuidv4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
+
+    const serializedPayload = serializeDynamoDBItem(payload);
 
     try {
       await dynamoDB.send(
         new PutItemCommand({
           TableName: TableNames.USERS,
-          Item: {
-            ...payload,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
+          Item: serializedPayload,
           // Ensure email doesn't already exist
           ConditionExpression: 'attribute_not_exists(email) AND attribute_not_exists(id)',
         }),
@@ -67,6 +93,7 @@ export async function createAccount(
       if (error instanceof ConditionalCheckFailedException) {
         return { error: 'Email already registered' };
       }
+
       console.error('Error creating account:', error);
       return { error: 'Failed to create account' };
     }
@@ -93,20 +120,26 @@ export async function sendVerificationEmail(
     const verificationCode = generateVerificationCode();
 
     // Store the verification code in DynamoDB
-    await dynamoDB.send(
-      new UpdateItemCommand({
-        TableName: TableNames.USERS,
-        Key: {
-          email: { S: email },
-        },
-        UpdateExpression: 'SET verificationCode = :code, verificationCodeExpiry = :expiry',
-        ExpressionAttributeValues: {
-          ':code': { S: verificationCode },
-          ':expiry': { S: new Date(Date.now() + 15 * 60 * 1000).toISOString() }, // 15 minutes expiry
-        },
-        ConditionExpression: 'registrationToken = :token',
-      }),
-    );
+    try {
+      const payload = {
+        code: verificationCode,
+        expiry: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        token: registrationToken,        
+      }
+
+      await dynamoDB.send(
+        new UpdateItemCommand({
+          TableName: TableNames.USERS,
+          Key: serializeDynamoDBItem({ email }),
+          UpdateExpression: 'SET verificationCode = :code, verificationCodeExpiry = :expiry',
+          ExpressionAttributeValues: serializeDynamoDBItem(payload, { expressionKey: true }),
+          ConditionExpression: 'registrationToken = :token'
+        })
+      );
+    } catch (error) {
+      console.error('Test:', error);
+      return { error: 'Failed to send verification email' };
+    }
 
     const registrationLink = `${process.env.FRONTEND_URL}/verify-email?token=${registrationToken}`;
 
