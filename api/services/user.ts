@@ -1,11 +1,11 @@
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import { TableNames } from '../config/database';
+import { createDynamoDBClient, TableNames } from '../config/database';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import bcrypt from 'bcryptjs';
 
 interface User {
   email: string;
-  passwordHash: string;
+  password: string;
   isEmailVerified: boolean;
 }
 
