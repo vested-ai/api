@@ -26,13 +26,6 @@ interface SerializationOptions {
 
 const dynamoDB = createDynamoDBClient();
 
-type DynamoDBAttributeValue = {
-  S?: string;
-  N?: string;
-  BOOL?: boolean;
-  // Add other DynamoDB types as needed
-};
-
 function serializeDynamoDBItem(
   item: Record<string, any>,
   options?: SerializationOptions,
