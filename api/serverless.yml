@@ -16,6 +16,22 @@ provider:
     JWT_SECRET: ${env:JWT_SECRET}
     JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
     IS_LOCAL_ENVIRONMENT: ${self:custom.IS_LOCAL_ENVIRONMENT}
+    ENVIRONMENT: ${env:NODE_ENV}
+    DEPLOYMENT_BUCKET: ${env:DEPLOYMENT_BUCKET}
+    USERS_TABLE: ${self:resources.Resources.users.Properties.TableName}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # performance optimization
+  logRetentionInDays: 14
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+          Resource:
+            - !GetAtt users.Arn
+            - !Join ['', [!GetAtt users.Arn, '/index/*']]  # if we add GSIs later
 
 plugins:
   - serverless-offline
@@ -33,6 +49,27 @@ functions:
           path: /
           method: ANY
           cors: true
+
+resources:
+  Resources:
+    users:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Users
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: false
+        SSESpecification:
+          SSEEnabled: false
+        Tags:
+          - Key: Environment
+            Value: ${self:provider.environment.ENVIRONMENT}
 
 custom:
   IS_LOCAL_ENVIRONMENT: ${env:IS_LOCAL_ENVIRONMENT, 'true'}
