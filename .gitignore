@@ -1,4 +1,44 @@
-node_modules
-.serverless
+# Dependencies
+node_modules/
+
+# Environment files
 .env
-.build
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+.build/
+*.tsbuildinfo
+
+# Serverless
+.serverless/
+.webpack/
+.esbuild/
+
+# AWS
+.aws/*
+.dynamodb/
+
+# Testing
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
