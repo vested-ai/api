@@ -1,8 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 
-const isLocalEnvironment =
-  process.env.IS_LOCAL_ENVIRONMENT || process.env.NODE_ENV === 'development';
+const isLocalEnvironment = process.env.IS_LOCAL_ENVIRONMENT === 'true';
 
 type DbConfig = {
   endpoint?: string;
@@ -13,33 +12,29 @@ type DbConfig = {
 };
 
 export function createDynamoDBClient() {
-  // Use local endpoint for development
-  const dbConfig: DbConfig = isLocalEnvironment
-    ? {
-        region: 'localhost',
-        endpoint: process.env.DYNAMO_ENDPOINT || 'http://localhost:8000',
-        credentials: {
-          accessKeyId: 'dummy',
-          secretAccessKey: 'dummy',
-        },
-        tls: false,
-        retryMode: 'standard',
-      }
-    : {
-        region: process.env.AWS_REGION || 'us-east-1',
-      };
+  const dbConfig: DbConfig = {
+    region: process.env.AWS_REGION || 'us-east-1',
+  };
+
+  if (isLocalEnvironment) {
+    dbConfig.endpoint = process.env.DYNAMO_ENDPOINT || 'http://localhost:8000';
+    dbConfig.credentials = {
+      accessKeyId: 'dummy',
+      secretAccessKey: 'dummy',
+    };
+    dbConfig.tls = false;
+    dbConfig.retryMode = 'standard';
+  }
 
   const client = new DynamoDBClient(dbConfig);
 
-  // Create document client for easier handling of data types
   return DynamoDBDocumentClient.from(client, {
     marshallOptions: {
-      removeUndefinedValues: true, // Remove undefined values from objects
+      removeUndefinedValues: true,
     },
   });
 }
 
-// Export table names as constants
 export const TableNames = {
-  USERS: 'Users',
+  USERS: `Users-${process.env.STAGE || 'development'}`,
 } as const;

@@ -20,17 +20,22 @@ provider:
     DEPLOYMENT_BUCKET: ${env:DEPLOYMENT_BUCKET}
     USERS_TABLE: ${self:resources.Resources.users.Properties.TableName}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # performance optimization
+    DYNAMO_ENDPOINT: ${env:DYNAMO_ENDPOINT}
   logRetentionInDays: 14
   iam:
     role:
       statements:
         - Effect: Allow
           Action:
+            - dynamodb:Query
+            - dynamodb:Scan
             - dynamodb:GetItem
             - dynamodb:PutItem
             - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
           Resource:
             - !GetAtt users.Arn
+            - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Users-${self:provider.stage}"
             - !Join ['', [!GetAtt users.Arn, '/index/*']]  # if we add GSIs later
 
 plugins:
@@ -55,7 +60,7 @@ resources:
     users:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: Users
+        TableName: Users-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: email
             AttributeType: S
