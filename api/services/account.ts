@@ -147,7 +147,7 @@ export async function sendVerificationEmail(
     const registrationLink = `${process.env.FRONTEND_URL}/verify-email?token=${registrationToken}`;
 
     // Send the email
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: email,
       subject: 'Verify your email address',
       text: `Your verification code is: ${verificationCode}. This code will expire in 15 minutes.`,
@@ -159,6 +159,24 @@ export async function sendVerificationEmail(
         <p>This code will expire in 15 minutes.</p>
       `,
     });
+
+    if (emailResult && 'code' in emailResult) {
+      switch (emailResult.code) {
+        case 'SANDBOX_RECIPIENT_NOT_VERIFIED':
+          return { 
+            error: 'This email address needs to be verified in our system first. Please contact support.' 
+          };
+        case 'DAILY_QUOTA_EXCEEDED':
+          return { 
+            error: 'Unable to send verification email due to system limits. Please try again later.' 
+          };
+        default:
+          console.error('Email sending failed:', emailResult);
+          return { 
+            error: 'Failed to send verification email. Please try again later.' 
+          };
+      }
+    }
 
     return 'Verification email sent successfully';
   } catch (error) {
