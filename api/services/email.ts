@@ -61,12 +61,12 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
           Data: config.subject,
         },
       },
-      Source: process.env.SES_FROM_EMAIL || 'noreply@yourdomain.com',
+      Source: process.env.SES_FROM_EMAIL || 'noreply@mail.allvested.com',
     });
 
     try {
       await sesClient.send(command);
-      console.log(`Email send via SES to ${config.to}`);
+      console.log(`Email sent via SES to ${config.to}`);
     } catch (error) {
       console.error(`Error sending email via SES: ${error}`);
       throw new Error(`Failed to send email: ${error}`);
