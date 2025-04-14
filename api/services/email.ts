@@ -52,7 +52,9 @@ export async function sendEmail(config: EmailConfig): Promise<void | EmailError>
     }
   } else {
     // Use AWS SES in production
-    const sesClient = new SESClient({ region: process.env.AWS_REGION || 'us-east-1' });
+    const sesClient = new SESClient({ 
+      region: process.env.AWS_REGION || 'us-east-1'
+    });
 
     const command = new SendEmailCommand({
       Destination: {

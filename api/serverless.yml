@@ -41,6 +41,7 @@ provider:
             - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Users-${self:provider.stage}"
             - !Join ['', [!GetAtt users.Arn, '/index/*']]  # if we add GSIs later
             - !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*"
+            - !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:configuration-set/*"
 
 plugins:
   - serverless-offline
