@@ -5,8 +5,14 @@ dotenv.config();
 
 async function testEmailSending() {
   try {
+    // Validate email address
+    const emailAddress = process.argv[2] || process.env.TEST_EMAIL || '';
+    if (!emailAddress) {
+      console.error('Error: No email address provided. Use command line argument or set TEST_EMAIL environment variable.');
+      process.exit(1);
+    }
     const result = await sendEmail({
-      to: process.argv[2] || process.env.TEST_EMAIL!,
+      to: emailAddress,
       subject: 'Test Email from AllVested',
       text: 'This is a test email from the AllVested platform.',
       html: `
