@@ -12,16 +12,32 @@ describe('SES Integration Tests', () => {
     }
   });
 
-  it('should send email via SES to verified address', async () => {    
-    const result = await sendEmail({
-      to: process.env.TEST_VERIFIED_EMAIL!, // Use a verified test email
-      subject: 'Integration Test',
-      text: 'This is an integration test email',
-      html: '<p>This is an integration test email</p>'
-    });
+beforeEach(() => {
+  // Skip tests if integration tests are not enabled
+  if (!runIntegrationTests) {
+    return;
+  }
+  
+  // Ensure TEST_VERIFIED_EMAIL is set
+  if (!process.env.TEST_VERIFIED_EMAIL) {
+    throw new Error('TEST_VERIFIED_EMAIL environment variable must be set to run this test');
+  }
+});
 
-    expect(result).toBeUndefined(); // Success returns void
+it('should send email via SES to verified address', async () => {    
+  if (!runIntegrationTests) {
+    return;
+  }
+    
+  const result = await sendEmail({
+    to: process.env.TEST_VERIFIED_EMAIL!, // Use a verified test email
+    subject: 'Integration Test',
+    text: 'This is an integration test email',
+    html: '<p>This is an integration test email</p>'
   });
+
+  expect(result).toBeUndefined(); // Success returns void
+});
 
   it('should handle unverified recipient in sandbox mode', async () => {
     const result = await sendEmail({
