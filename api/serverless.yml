@@ -43,6 +43,7 @@ provider:
             - !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*"
             - !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:configuration-set/*"
 
+
 plugins:
   - serverless-offline
   - serverless-plugin-typescript
