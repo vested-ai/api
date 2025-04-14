@@ -1,6 +1,13 @@
 import nodemailer, { TransportOptions } from 'nodemailer';
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { 
+  SESClient, 
+  SendEmailCommand, 
+  MessageRejected,
+  SendEmailCommandOutput
+} from '@aws-sdk/client-ses';
 import crypto from 'crypto';
+import { emailErrorCodes } from '../utils/constants';
+
 
 // Generate a 6-digit verification code
 export function generateVerificationCode(): string {
@@ -14,7 +21,13 @@ interface EmailConfig {
   html: string;
 }
 
-export async function sendEmail(config: EmailConfig): Promise<void> {
+interface EmailError {
+  code: (typeof emailErrorCodes)[keyof typeof emailErrorCodes];
+  message: string;
+  originalError?: any;
+}
+
+export async function sendEmail(config: EmailConfig): Promise<void | EmailError> {
   const isLocalEnvironment = process.env.IS_OFFLINE || process.env.NODE_ENV === 'test';
 
   if (isLocalEnvironment) {
@@ -39,7 +52,9 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
     }
   } else {
     // Use AWS SES in production
-    const sesClient = new SESClient({ region: process.env.AWS_REGION || 'us-east-1' });
+    const sesClient = new SESClient({ 
+      region: process.env.AWS_REGION || 'us-east-1'
+    });
 
     const command = new SendEmailCommand({
       Destination: {
@@ -61,15 +76,38 @@ export async function sendEmail(config: EmailConfig): Promise<void> {
           Data: config.subject,
         },
       },
-      Source: process.env.SES_FROM_EMAIL || 'noreply@yourdomain.com',
+      Source: process.env.SES_FROM_EMAIL || 'no-reply@mail.allvested.com',
     });
 
     try {
-      await sesClient.send(command);
-      console.log(`Email send via SES to ${config.to}`);
+      const result: SendEmailCommandOutput = await sesClient.send(command);
+      console.log(`Email sent via SES to ${config.to}`, result.MessageId);
     } catch (error) {
-      console.error(`Error sending email via SES: ${error}`);
-      throw new Error(`Failed to send email: ${error}`);
+      if (error instanceof MessageRejected) {
+        // Handle specific SES errors
+        if (error.message.includes('Email address is not verified')) {
+          return {
+            code: emailErrorCodes.SANDBOX_RECIPIENT_NOT_VERIFIED,
+            message: 'Cannot send email: recipient not verified in SES sandbox mode',
+            originalError: error
+          };
+        }
+        
+        if (error.message.includes('Daily message quota exceeded')) {
+          return {
+            code: emailErrorCodes.DAILY_QUOTA_EXCEEDED,
+            message: 'Cannot send email: daily sending quota exceeded',
+            originalError: error
+          };
+        }
+      }
+
+      console.error(`Error sending email via SES:`, error);
+      return {
+        code: emailErrorCodes.GENERAL_ERROR,
+        message: `Failed to send email: ${error.message}`,
+        originalError: error
+      };
     }
   }
 }

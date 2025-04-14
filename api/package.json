@@ -13,7 +13,9 @@
     "db:stop": "docker-compose down",
     "db:setup": "ts-node scripts/setupDatabase.ts",
     "db:reset": "docker-compose down && docker-compose up -d && echo 'Waiting 2 seconds for database to start...' && sleep 2 && ts-node scripts/setupDatabase.ts",
-    "dev": "serverless offline start"
+    "dev": "serverless offline start",
+    "test:email:integration": "RUN_EMAIL_INTEGRATION_TESTS=true jest api/__tests__/integration/email.test.ts",
+    "test:email:manual": "ts-node scripts/testEmail.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.767.0",
